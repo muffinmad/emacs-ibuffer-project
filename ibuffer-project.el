@@ -68,9 +68,9 @@
   (with-current-buffer buf
     (unless (string-match-p "^ " (buffer-name))
       (let ((dir (cdr-safe (project-current))))
-        (if dir
-            (cons dir 'project)
-          (when default-directory (cons (abbreviate-file-name default-directory) 'directory)))))))
+        (cond
+         (dir (cons dir 'project))
+         (default-directory (cons (abbreviate-file-name default-directory) 'directory)))))))
 
 (defun ibuffer-project-group-name (root type)
   "Return group name for project ROOT and TYPE."
@@ -93,16 +93,16 @@
          (bufb (car b))
          (filea (with-current-buffer bufa buffer-file-name))
          (fileb (with-current-buffer bufb buffer-file-name)))
-    (if (and filea fileb)
-        (string-lessp filea fileb)
-      (if (or filea fileb)
-          (null fileb)
-        (string-lessp (buffer-name bufa) (buffer-name bufb))))))
+    (cond
+     ((and filea fileb) (string-lessp filea fileb))
+     ((or filea fileb) (null fileb))
+     (t (string-lessp (buffer-name bufa) (buffer-name bufb))))))
 
 (defvar ibuffer-project-file-relative-header-map
   (let ((map (make-sparse-keymap)))
     (define-key map [(mouse-1)] 'ibuffer-do-sort-by-project-file-relative)
-    map))
+    map)
+  "Mouse keymap for filename relative to project column.")
 
 ;;;###autoload (autoload 'ibuffer-make-column-project-file-relative "ibuffer-project")
 (define-ibuffer-column project-file-relative
@@ -116,7 +116,7 @@
     (propertize (buffer-name) 'font-lock-face 'font-lock-comment-face)))
 
 ;;;###autoload
-(defun ibuffer-project-generate-filter-groups()
+(defun ibuffer-project-generate-filter-groups ()
   "Create ibuffer filters based on project root of buffers."
   (let ((roots (ibuffer-remove-duplicates
                 (delq nil (mapcar 'ibuffer-project-root (buffer-list))))))
