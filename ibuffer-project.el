@@ -67,7 +67,7 @@
   "Return a cons cell (project-root . root-type) for BUF."
   (with-current-buffer buf
     (unless (string-match-p "^ " (buffer-name))
-      (let ((dir (cdr-safe (project-current))))
+      (let ((dir (cdr (project-current))))
         (cond
          (dir (cons dir 'project))
          (default-directory (cons (abbreviate-file-name default-directory) 'directory)))))))
