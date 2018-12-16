@@ -1,4 +1,5 @@
 [![License GPL 3](https://img.shields.io/badge/license-GPL_3-green.svg)](http://www.gnu.org/copyleft/gpl.html)
+[![MELPA](http://melpa.org/packages/ibuffer-project-badge.svg)](http://melpa.org/#/ibuffer-project)
 
 # emacs-ibuffer-project
 
@@ -43,6 +44,10 @@ It's also possible to sort buffers by that column by calling `ibuffer-do-sort-by
 
 ### With `package.el`
 
-Download `ibuffer-project.el` and run:
+`ibuffer-project` available on [MELPA](http://melpa.org):
+
+<kbd>M-x</kbd> `package-install` <kbd>RET</kbd> `ibuffer-project` <kbd>RET</kbd>.
+
+Alternatively, you can download `ibuffer-project.el` and run:
 
 <kbd>M-x</kbd> `package-install-file` <kbd>RET</kbd> `<path-to-ibuffer-project-el>` <kbd>RET</kbd>
