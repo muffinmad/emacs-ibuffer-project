@@ -5,7 +5,7 @@
 ;; Author: Andrii Kolomoiets <andreyk.mad@gmail.com>
 ;; Keywords: tools
 ;; URL: https://github.com/muffinmad/emacs-ibuffer-project
-;; Package-Version: 1.0
+;; Package-Version: 1.1
 ;; Package-Requires: ((emacs "25.1"))
 
 ;; This file is NOT part of GNU Emacs.
@@ -91,8 +91,8 @@
   (:description "project filename relative")
   (let* ((bufa (car a))
          (bufb (car b))
-         (filea (with-current-buffer bufa buffer-file-name))
-         (fileb (with-current-buffer bufb buffer-file-name)))
+         (filea (buffer-local-value 'buffer-file-name bufa))
+         (fileb (buffer-local-value 'buffer-file-name bufb)))
     (cond
      ((and filea fileb) (string-lessp filea fileb))
      ((or filea fileb) (null fileb))
