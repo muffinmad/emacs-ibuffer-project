@@ -19,7 +19,7 @@ To group buffers by project set `ibuffer-filter-groups` to result of `ibuffer-pr
 
 This package also provides column with filename relative to project. If there are no file in buffer then column will display buffer name.
 
-Add project-file-relative to `ibuffer-formats`:
+Add `project-file-relative` to `ibuffer-formats`:
 ```elisp
 (custom-set-variables
  '(ibuffer-formats
