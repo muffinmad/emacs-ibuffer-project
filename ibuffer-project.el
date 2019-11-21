@@ -5,7 +5,7 @@
 ;; Author: Andrii Kolomoiets <andreyk.mad@gmail.com>
 ;; Keywords: tools
 ;; URL: https://github.com/muffinmad/emacs-ibuffer-project
-;; Package-Version: 1.1
+;; Package-Version: 1.2
 ;; Package-Requires: ((emacs "25.1"))
 
 ;; This file is NOT part of GNU Emacs.
@@ -128,8 +128,9 @@
 ;;;###autoload
 (defun ibuffer-project-generate-filter-groups ()
   "Create ibuffer filters based on project root of buffers."
-  (let ((roots (ibuffer-remove-duplicates
-                (delq nil (mapcar 'ibuffer-project-root (buffer-list))))))
+  (let ((roots (sort (ibuffer-remove-duplicates
+                      (delq nil (mapcar 'ibuffer-project-root (buffer-list))))
+                     (lambda (a b) (string-lessp (car a) (car b))))))
     (mapcar (lambda (root)
               (cons (ibuffer-project-group-name (car root) (cdr root))
                     `((project-root . ,root))))
