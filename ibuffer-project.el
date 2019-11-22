@@ -5,7 +5,7 @@
 ;; Author: Andrii Kolomoiets <andreyk.mad@gmail.com>
 ;; Keywords: tools
 ;; URL: https://github.com/muffinmad/emacs-ibuffer-project
-;; Package-Version: 1.2
+;; Package-Version: 1.2.1
 ;; Package-Requires: ((emacs "25.1"))
 
 ;; This file is NOT part of GNU Emacs.
@@ -103,7 +103,7 @@
                      (nameb (buffer-name bufb))
                      (asteriska (string-match-p "^*" namea))
                      (asteriskb (string-match-p "^*" nameb)))
-                (if (xor asteriska asteriskb)
+                (if (if asteriska (not asteriskb) asteriskb)
                     (null asteriska)
                   (string-lessp namea nameb))))))
       (string-lessp projecta projectb))))
