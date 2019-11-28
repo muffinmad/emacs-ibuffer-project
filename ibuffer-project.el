@@ -103,6 +103,8 @@
                      (nameb (buffer-name bufb))
                      (asteriska (string-match-p "^*" namea))
                      (asteriskb (string-match-p "^*" nameb)))
+                ;; This is xor :) Just to not autoload xor from
+                ;; "array" on Emacs pre 27 where xor is added to subr.el
                 (if (if asteriska (not asteriskb) asteriskb)
                     (null asteriska)
                   (string-lessp namea nameb))))))
