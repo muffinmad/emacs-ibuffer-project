@@ -77,8 +77,11 @@
     (let ((dir (buffer-local-value 'default-directory buf)))
       (when dir
         (or (gethash dir ibuffer-project-group-cache)
-            (let* ((root (cdr (project-current nil dir)))
+            (let* ((remote (tramp-handle-file-remote-p dir))
+                   (root (unless remote
+                           (cdr (project-current nil dir))))
                    (result (cond
+                            (remote (cons remote 'tramp))
                             (root (cons root 'project))
                             (dir (cons (abbreviate-file-name dir) 'directory)))))
               (puthash dir result ibuffer-project-group-cache)
@@ -87,9 +90,10 @@
 (defun ibuffer-project-group-name (root type)
   "Return group name for project ROOT and TYPE."
   (format "%s: %s"
-          (cl-case type
+          (cl-ecase type
+            (tramp "Remote")
             (project "Project")
-            (otherwise "Directory"))
+            (directory "Directory"))
           root))
 
 (define-ibuffer-filter project-root
