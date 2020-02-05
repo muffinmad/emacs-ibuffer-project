@@ -63,14 +63,26 @@
 (require 'ibuffer)
 (require 'ibuf-ext)
 
+(defvar ibuffer-project-group-cache (make-hash-table)
+  "Cache for mappings from a directory to its group data.")
+
+(defun ibuffer-project-clear-group-cache ()
+  "Empty the group cache."
+  (interactive)
+  (setq ibuffer-project-group-cache (make-hash-table)))
+
 (defun ibuffer-project-root (buf)
   "Return a cons cell (project-root . root-type) for BUF."
   (unless (string-match-p "^ " (buffer-name buf))
-    (let* ((dir (buffer-local-value 'default-directory buf))
-           (root (when dir (cdr (project-current nil dir)))))
-      (cond
-       (root (cons root 'project))
-       (dir (cons (abbreviate-file-name dir) 'directory))))))
+    (let ((dir (buffer-local-value 'default-directory buf)))
+      (when dir
+        (or (gethash dir ibuffer-project-group-cache)
+            (let* ((root (cdr (project-current nil dir)))
+                   (result (cond
+                            (root (cons root 'project))
+                            (dir (cons (abbreviate-file-name dir) 'directory)))))
+              (puthash dir result ibuffer-project-group-cache)
+              result))))))
 
 (defun ibuffer-project-group-name (root type)
   "Return group name for project ROOT and TYPE."
