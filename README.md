@@ -41,6 +41,10 @@ It's also possible to sort buffers by that column by calling `ibuffer-do-sort-by
               (ibuffer-do-sort-by-project-file-relative))))
 ```
 
+### Clearing the cache
+
+For performance, this package stores the locations of projects in memory. To clear the cache, run `ibuffer-project-clear-group-cache`.
+
 ## Installation
 
 ### With `package.el`
