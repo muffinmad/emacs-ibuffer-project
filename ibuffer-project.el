@@ -63,6 +63,14 @@
 (require 'ibuffer)
 (require 'ibuf-ext)
 
+(defcustom ibuffer-project-tramp-ignore-pattern
+  (rx bol "/" (or "sudo" "su") ":")
+  "Regexp pattern of paths that should not be grouped by TRAMP hosts.
+
+The default value matches any file path that begin with \"sudo\" or
+\"su\"."
+  :type 'regexp)
+
 (defvar ibuffer-project-group-cache (make-hash-table)
   "Cache for mappings from a directory to its group data.")
 
@@ -77,7 +85,8 @@
     (let ((dir (buffer-local-value 'default-directory buf)))
       (when dir
         (or (gethash dir ibuffer-project-group-cache)
-            (let* ((remote (tramp-handle-file-remote-p dir))
+            (let* ((remote (and (not (string-match-p ibuffer-project-tramp-ignore-pattern dir))
+                                (tramp-handle-file-remote-p dir)))
                    (root (unless remote
                            (cdr (project-current nil dir))))
                    (result (cond
