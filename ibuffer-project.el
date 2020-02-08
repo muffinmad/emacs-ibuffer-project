@@ -66,11 +66,11 @@
 (defun ibuffer-project-root (buf)
   "Return a cons cell (project-root . root-type) for BUF."
   (unless (string-match-p "^ " (buffer-name buf))
-    (with-current-buffer buf
-      (let ((dir (cdr (project-current))))
-        (cond
-         (dir (cons dir 'project))
-         (default-directory (cons (abbreviate-file-name default-directory) 'directory)))))))
+    (let* ((dir (buffer-local-value 'default-directory buf))
+           (root (and dir (cdr (project-current nil dir)))))
+      (cond
+       (root (cons root 'project))
+       (dir (cons (abbreviate-file-name dir) 'directory))))))
 
 (defun ibuffer-project-group-name (root type)
   "Return group name for project ROOT and TYPE."
