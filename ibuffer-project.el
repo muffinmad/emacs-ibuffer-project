@@ -35,7 +35,7 @@
 ;;              (lambda ()
 ;;                (setq ibuffer-filter-groups (ibuffer-project-generate-filter-groups))))
 ;;
-;; This package also provides column with filename relative to project. If there are no
+;; This package also provides column with filename relative to project.  If there are no
 ;; file in buffer then column will display `buffer-name' with `font-lock-comment-face' face.
 ;; Add project-file-relative to `ibuffer-formats':
 ;;
