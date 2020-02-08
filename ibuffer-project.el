@@ -5,7 +5,7 @@
 ;; Author: Andrii Kolomoiets <andreyk.mad@gmail.com>
 ;; Keywords: tools
 ;; URL: https://github.com/muffinmad/emacs-ibuffer-project
-;; Package-Version: 1.2.1
+;; Package-Version: 1.3
 ;; Package-Requires: ((emacs "25.1"))
 
 ;; This file is NOT part of GNU Emacs.
@@ -57,20 +57,49 @@
 ;;                (setq ibuffer-filter-groups (ibuffer-project-generate-filter-groups))
 ;;                (unless (eq ibuffer-sorting-mode 'project-file-relative)
 ;;                  (ibuffer-do-sort-by-project-file-relative))))
+;;
+;; To avoid calling `project-current' each time, one can set `ibuffer-project-use-cache'.
+;; Project info per directory will be stored in the `ibuffer-project-cache' variable.
+;; Command `ibuffer-project-clear-cache' allows to clear project info cache.
 
 ;;; Code:
 
 (require 'ibuffer)
 (require 'ibuf-ext)
 
+(defgroup ibuffer-project nil
+  "Group ibuffer entries by project."
+  :group 'ibuffer)
+
+(defcustom ibuffer-project-use-cache nil
+  "If non-nil, cache project per directory.
+To clear cache use `ibuffer-project-clear-cache' command."
+  :type 'boolean)
+
+(defvar ibuffer-project-cache (make-hash-table :test 'equal)
+  "Variable to store cache of project per directory.")
+
+(defun ibuffer-project-clear-cache ()
+  "Clear project data per directory cache."
+  (interactive)
+  (clrhash ibuffer-project-cache))
+
 (defun ibuffer-project-root (buf)
   "Return a cons cell (project-root . root-type) for BUF."
   (unless (string-match-p "^ " (buffer-name buf))
-    (let* ((dir (buffer-local-value 'default-directory buf))
-           (root (and dir (cdr (project-current nil dir)))))
+    (let* ((dir (abbreviate-file-name (buffer-local-value 'default-directory buf)))
+           (root (and dir
+                      (if ibuffer-project-use-cache
+                          (let ((cached (gethash dir ibuffer-project-cache 0)))
+                            (if (eq cached 0)
+                                (let ((root (cdr (project-current nil dir))))
+                                  (puthash dir root ibuffer-project-cache)
+                                  root)
+                              cached))
+                        (cdr (project-current nil dir))))))
       (cond
        (root (cons root 'project))
-       (dir (cons (abbreviate-file-name dir) 'directory))))))
+       (dir (cons dir 'directory))))))
 
 (defun ibuffer-project-group-name (root type)
   "Return group name for project ROOT and TYPE."

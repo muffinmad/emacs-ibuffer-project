@@ -41,6 +41,10 @@ It's also possible to sort buffers by that column by calling `ibuffer-do-sort-by
               (ibuffer-do-sort-by-project-file-relative))))
 ```
 
+### Caching project per directory
+
+To avoid calling `project-current` each time, one can set `ibuffer-project-use-cache`. Project info will be stored in the `ibuffer-project-cache` variable. Command `ibuffer-project-clear-cache` allows to clear project info cache.
+
 ## Installation
 
 ### With `package.el`
