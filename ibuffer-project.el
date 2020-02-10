@@ -1,11 +1,11 @@
-;;; ibuffer-project.el --- Group ibuffer's list by project -*- lexical-binding: t; -*-
+;;; ibuffer-project.el --- Group ibuffer's list by project or any function -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2018 Andrii Kolomoiets
+;; Copyright (C) 2018-2020 Andrii Kolomoiets
 
 ;; Author: Andrii Kolomoiets <andreyk.mad@gmail.com>
 ;; Keywords: tools
 ;; URL: https://github.com/muffinmad/emacs-ibuffer-project
-;; Package-Version: 1.3
+;; Package-Version: 2.0
 ;; Package-Requires: ((emacs "25.1"))
 
 ;; This file is NOT part of GNU Emacs.
@@ -26,9 +26,18 @@
 ;;; Commentary:
 
 ;; This pacakage provides ibuffer filtering and sorting functions to group buffers
-;; by project or by `default-directory'
+;; by function or regexp applied to `default-directory'.  By default buffers are
+;; grouped by `project-current' or by `default-directory'.
 ;;
-;; To group buffers by project set `ibuffer-filter-groups' to result of
+;; Buffer group and group type name is determined by function or regexp listed
+;; in `ibuffer-project-root-functions'.  E.g. by adding `file-remote-p' like this:
+;;
+;;    (add-to-list 'ibuffer-project-root-functions '(file-remote-p . "Remote"))
+;;
+;; remote buffers will be grouped by protocol and host.
+;;
+;;
+;; To group buffers set `ibuffer-filter-groups' to result of
 ;; `ibuffer-project-generate-filter-groups' function:
 ;;
 ;;    (add-hook 'ibuffer-hook
@@ -58,8 +67,8 @@
 ;;                (unless (eq ibuffer-sorting-mode 'project-file-relative)
 ;;                  (ibuffer-do-sort-by-project-file-relative))))
 ;;
-;; To avoid calling `project-current' each time, one can set `ibuffer-project-use-cache'.
-;; Project info per directory will be stored in the `ibuffer-project-cache' variable.
+;; To avoid calculating project root each time, one can set `ibuffer-project-use-cache'.
+;; Root info per directory will be stored in the `ibuffer-project-roots-cache' variable.
 ;; Command `ibuffer-project-clear-cache' allows to clear project info cache.
 
 ;;; Code:
@@ -76,34 +85,70 @@
 To clear cache use `ibuffer-project-clear-cache' command."
   :type 'boolean)
 
-(defvar ibuffer-project-cache (make-hash-table :test 'equal)
+(defvar ibuffer-project-roots-cache (make-hash-table :test 'equal)
   "Variable to store cache of project per directory.")
 
 (defun ibuffer-project-clear-cache ()
   "Clear project data per directory cache."
   (interactive)
-  (clrhash ibuffer-project-cache))
+  (clrhash ibuffer-project-roots-cache))
+
+(defun ibuffer-project-set-root-functions (s v)
+  "Clear `ibuffer-project-roots-cache' and set S to V."
+  (ibuffer-project-clear-cache)
+  (set-default s v))
+
+(defcustom ibuffer-project-root-functions '(((lambda (dir) (cdr (project-current nil dir))) . "Project")
+                                            (identity . "Directory"))
+  "Functions to get root to group by.
+Cons of each item can be:
+- Function which will be called with abbreviated `default-directory' as only
+  argument and must return project root or nil;
+- Regexp whose `(match-string 1)' will be used as root.
+
+Cell is the title of the group type.
+
+After modifiyng this variable from Lisp code don't forget to call
+`ibuffer-project-clear-cache' to clear `ibuffer-project-roots-cache' if you
+use it."
+  :type '(repeat (cons (choice (const :tag "Project" (lambda (dir) (cdr (project-current nil dir))))
+                               (const :tag "Default directory" identity)
+                               (function :tag "Function")
+                               (regexp :tag "Regexp"))
+                       string))
+  :set #'ibuffer-project-set-root-functions)
+
+(defun ibuffer-project--root (dir)
+  "Run functions from `ibuffer-project-root-functions' for DIR."
+  (catch 'match
+    (dolist (entry ibuffer-project-root-functions)
+      (let* ((f (car entry))
+             (root (cond
+                    ((functionp f) (funcall f dir))
+                    ((stringp f) (when (string-match f dir)
+                                   (match-string 1 dir))))))
+        (when root
+          (throw 'match (cons root (cdr entry))))))))
 
 (defun ibuffer-project-root (buf)
   "Return a cons cell (project-root . root-type) for BUF."
   (unless (string-match-p "^ " (buffer-name buf))
-    (let* ((dir (abbreviate-file-name (buffer-local-value 'default-directory buf)))
-           (root (and dir
-                      (if ibuffer-project-use-cache
-                          (let ((cached (gethash dir ibuffer-project-cache 0)))
-                            (if (eq cached 0)
-                                (let ((root (cdr (project-current nil dir))))
-                                  (puthash dir root ibuffer-project-cache)
-                                  root)
-                              cached))
-                        (cdr (project-current nil dir))))))
-      (cond
-       (root (cons root 'project))
-       (dir (cons dir 'directory))))))
+    (let* ((dir (abbreviate-file-name (buffer-local-value 'default-directory buf))))
+      (when dir
+        (if ibuffer-project-use-cache
+            (let ((cached (gethash dir ibuffer-project-roots-cache 'no-cached)))
+              (if (eq cached 'no-cached)
+                  (let ((root (ibuffer-project--root dir)))
+                    (puthash dir root ibuffer-project-roots-cache)
+                    root)
+                cached))
+          (ibuffer-project--root dir))))))
 
 (defun ibuffer-project-group-name (root type)
   "Return group name for project ROOT and TYPE."
-  (format "%s: %s" (if (eq type 'project) "Project" "Directory") root))
+  (if (and (stringp type) (> (length type) 0))
+      (format "%s: %s" type root)
+    (format "%s" root)))
 
 (define-ibuffer-filter project-root
     "Toggle current view to buffers with project root dir QUALIFIER."

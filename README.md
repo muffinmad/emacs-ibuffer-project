@@ -4,16 +4,24 @@
 
 # emacs-ibuffer-project
 
-Emacs package that provides ibuffer filtering and sorting functions to group buffers by project or by default directory.
+Emacs package that provides ibuffer filtering and sorting functions to group buffers by custom functions or regexps. By default buffers are grouped by project or by default directory.
 
 ## Usage
 
-To group buffers by project set `ibuffer-filter-groups` to result of `ibuffer-project-generate-filter-groups` function:
+To group buffers set `ibuffer-filter-groups` to result of `ibuffer-project-generate-filter-groups` function:
 ```elisp
 (add-hook 'ibuffer-hook
   (lambda ()
     (setq ibuffer-filter-groups (ibuffer-project-generate-filter-groups))))
 ```
+
+### Custom groups
+
+Creating custom groups is possible by customizing `ibuffer-project-root-functions`. For example, add function `file-remote-p` like this:
+```elisp
+(add-to-list 'ibuffer-project-root-functions '(file-remote-p . "Remote"))
+```
+In this case all remote buffers will be grouped by a string identifying the remote connection.
 
 ### Project relative filename
 
