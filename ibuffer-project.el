@@ -5,7 +5,7 @@
 ;; Author: Andrii Kolomoiets <andreyk.mad@gmail.com>
 ;; Keywords: tools
 ;; URL: https://github.com/muffinmad/emacs-ibuffer-project
-;; Package-Version: 2.0
+;; Package-Version: 2.1
 ;; Package-Requires: ((emacs "25.1"))
 
 ;; This file is NOT part of GNU Emacs.
@@ -75,6 +75,7 @@
 
 (require 'ibuffer)
 (require 'ibuf-ext)
+(require 'project)
 
 (defgroup ibuffer-project nil
   "Group ibuffer entries by project."
@@ -98,7 +99,15 @@ To clear cache use `ibuffer-project-clear-cache' command."
   (ibuffer-project-clear-cache)
   (set-default s v))
 
-(defcustom ibuffer-project-root-functions '(((lambda (dir) (cdr (project-current nil dir))) . "Project")
+(defun ibuffer-project-project-root (dir)
+  "Get project root in DIR."
+  (let ((project (project-current nil dir)))
+    (and project
+         (if (functionp 'project-root)
+             (project-root project)
+           (car (project-roots project))))))
+
+(defcustom ibuffer-project-root-functions '((ibuffer-project-project-root . "Project")
                                             (identity . "Directory"))
   "Functions to get root to group by.
 Cons of each item can be:
