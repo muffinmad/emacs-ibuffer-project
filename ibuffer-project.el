@@ -1,11 +1,11 @@
 ;;; ibuffer-project.el --- Group ibuffer's list by project or any function -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2018-2020 Andrii Kolomoiets
+;; Copyright (C) 2018-2022 Andrii Kolomoiets
 
 ;; Author: Andrii Kolomoiets <andreyk.mad@gmail.com>
 ;; Keywords: tools
 ;; URL: https://github.com/muffinmad/emacs-ibuffer-project
-;; Package-Version: 2.1
+;; Package-Version: 2.2
 ;; Package-Requires: ((emacs "25.1"))
 
 ;; This file is NOT part of GNU Emacs.
@@ -120,7 +120,7 @@ Cell is the title of the group type.
 After modifiyng this variable from Lisp code don't forget to call
 `ibuffer-project-clear-cache' to clear `ibuffer-project-roots-cache' if you
 use it."
-  :type '(repeat (cons (choice (const :tag "Project" (lambda (dir) (cdr (project-current nil dir))))
+  :type '(repeat (cons (choice (const :tag "Project" ibuffer-project-project-root)
                                (const :tag "Default directory" identity)
                                (function :tag "Function")
                                (regexp :tag "Regexp"))
