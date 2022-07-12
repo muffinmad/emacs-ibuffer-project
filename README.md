@@ -10,9 +10,12 @@ Emacs package that provides ibuffer filtering and sorting functions to group buf
 
 To group buffers set `ibuffer-filter-groups` to result of `ibuffer-project-generate-filter-groups` function:
 ```elisp
-(add-hook 'ibuffer-hook
-  (lambda ()
-    (setq ibuffer-filter-groups (ibuffer-project-generate-filter-groups))))
+(add-hook
+ 'ibuffer-hook
+ (lambda ()
+   (setq ibuffer-filter-groups (ibuffer-project-generate-filter-groups))
+   (unless (eq ibuffer-sorting-mode 'project-file-relative)
+     (ibuffer-do-sort-by-project-file-relative))))
 ```
 
 ### Custom groups
