@@ -1,3 +1,5 @@
+[![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner2-direct.svg)](https://stand-with-ukraine.pp.ua)
+
 [![License GPL 3](https://img.shields.io/badge/license-GPL_3-green.svg)](http://www.gnu.org/copyleft/gpl.html)
 [![MELPA](http://melpa.org/packages/ibuffer-project-badge.svg)](http://melpa.org/#/ibuffer-project)
 [![MELPA Stable](https://stable.melpa.org/packages/ibuffer-project-badge.svg)](https://stable.melpa.org/#/ibuffer-project)
