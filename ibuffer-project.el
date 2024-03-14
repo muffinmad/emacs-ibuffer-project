@@ -101,7 +101,8 @@ To clear cache use `ibuffer-project-clear-cache' command."
 
 (defun ibuffer-project-project-root (dir)
   "Get project root in DIR."
-  (let ((project (project-current nil dir)))
+  (let ((project (and (file-readable-p dir)
+					  (project-current nil dir))))
     (and project
          (if (functionp 'project-root)
              (project-root project)
